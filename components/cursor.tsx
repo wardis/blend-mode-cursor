@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 
-export default function Cursor() {
+export default function Cursor({ isActive = false }) {
   const mouse = useRef({ x: 0, y: 0 })
   const delayedMouse = useRef({ x: 0, y: 0 })
   const animationFrame = useRef(0)
   const circle = useRef(null)
-  const size = 30
+  const size = isActive ? 400 : 30
 
   const moveCircle = (x: number, y: number) => {
     gsap.set(circle.current, { x, y, xPercent: -50, yPercent: -50 })
@@ -45,12 +45,15 @@ export default function Cursor() {
   }, [])
 
   return (
-    <div className="h-screen fixed">
+    <div className="relative h-screen">
       <div
         style={{
           backgroundColor: '#bce4f2',
           width: size,
           height: size,
+          filter: `blur(${isActive ? 30 : 0}px)`,
+          transition:
+            'height 0.3s ease-out, width 0.3s ease-out, filter 0.3s ease-out',
         }}
         className="top-0 left-0 fixed rounded-full mix-blend-difference pointer-events-none"
         ref={circle}
