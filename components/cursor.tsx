@@ -5,6 +5,8 @@ import gsap from 'gsap'
 
 export default function Cursor() {
   const mouse = useRef({ x: 0, y: 0 })
+  const delayedMouse = useRef({ x: 0, y: 0 })
+  const animationFrame = useRef(0)
   const circle = useRef(null)
   const size = 30
 
@@ -18,12 +20,27 @@ export default function Cursor() {
       x: clientX,
       y: clientY,
     }
-    moveCircle(mouse.current.x, mouse.current.y)
+  }
+
+  const lerp = (x: number, y: number, a: number) => x * (1 - a) + y * a
+
+  const animate = () => {
+    const { x, y } = delayedMouse.current
+    delayedMouse.current = {
+      x: lerp(x, mouse.current.x, 0.1),
+      y: lerp(y, mouse.current.y, 0.1),
+    }
+    moveCircle(delayedMouse.current.x, delayedMouse.current.y)
+    animationFrame.current = window.requestAnimationFrame(animate)
   }
 
   useEffect(() => {
+    animate()
     window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.cancelAnimationFrame(animationFrame.current)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
