@@ -3,15 +3,21 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 
+const colors = ['#c32d27', '#f5c63f', '#457ec4', '#356fdb']
+
 export default function Cursor({ isActive = false }) {
   const mouse = useRef({ x: 0, y: 0 })
   const delayedMouse = useRef({ x: 0, y: 0 })
   const animationFrame = useRef(0)
-  const circle = useRef(null)
+  const circles = useRef<(HTMLDivElement | null)[]>([])
   const size = isActive ? 400 : 30
+  const delay = isActive ? 0.015 : 0.005
 
-  const moveCircle = (x: number, y: number) => {
-    gsap.set(circle.current, { x, y, xPercent: -50, yPercent: -50 })
+  const moveCircles = (x: number, y: number) => {
+    if (circles.current.length < 1) return
+    circles.current.forEach((circle, i) => {
+      gsap.set(circle, { x, y, xPercent: -50, yPercent: -50 })
+    })
   }
 
   const handleMouseMove = (e: MouseEvent) => {
@@ -27,10 +33,10 @@ export default function Cursor({ isActive = false }) {
   const animate = () => {
     const { x, y } = delayedMouse.current
     delayedMouse.current = {
-      x: lerp(x, mouse.current.x, 0.1),
-      y: lerp(y, mouse.current.y, 0.1),
+      x: lerp(x, mouse.current.x, 0.75),
+      y: lerp(y, mouse.current.y, 0.75),
     }
-    moveCircle(delayedMouse.current.x, delayedMouse.current.y)
+    moveCircles(delayedMouse.current.x, delayedMouse.current.y)
     animationFrame.current = window.requestAnimationFrame(animate)
   }
 
@@ -45,19 +51,23 @@ export default function Cursor({ isActive = false }) {
   }, [])
 
   return (
-    <div className="relative h-screen">
-      <div
-        style={{
-          backgroundColor: '#bce4f2',
-          width: size,
-          height: size,
-          filter: `blur(${isActive ? 30 : 0}px)`,
-          transition:
-            'height 0.3s ease-out, width 0.3s ease-out, filter 0.3s ease-out',
-        }}
-        className="top-0 left-0 fixed rounded-full mix-blend-difference pointer-events-none"
-        ref={circle}
-      />
+    <div>
+      {[...Array(4)].map((_, i) => (
+        <div
+          style={{
+            backgroundColor: colors[i],
+            width: size,
+            height: size,
+            filter: `blur(${isActive ? 20 : 0}px)`,
+            transition: `transform ${
+              (4 - i) * delay
+            }s linear, height 0.3s ease-out, width 0.3s ease-out, filter 0.3s ease-out`,
+          }}
+          className="top-0 left-0 fixed rounded-full mix-blend-difference pointer-events-none"
+          key={i}
+          ref={(ref) => (circles.current[i] = ref)}
+        />
+      ))}
     </div>
   )
 }

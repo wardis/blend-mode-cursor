@@ -9,7 +9,7 @@ export default function Scene() {
   return (
     <div className="h-screen flex items-center justify-center">
       <h1
-        className="text-[4.5vw] max-w-[90vw] text-center p-20 font-bold"
+        className="text-[4.5vw] max-w-[90vw] text-center p-20 font-bold z-50"
         onMouseOver={() => setisActive(true)}
         onMouseLeave={() => setisActive(false)}
       >
